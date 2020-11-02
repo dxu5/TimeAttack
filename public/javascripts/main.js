@@ -14,15 +14,18 @@ const drawBackground = (background, context, sprites) => {
 const canvas = document.getElementById("screen");
 const context = canvas.getContext("2d");
 
-loadImage("/image/tiles.png").then((image) => {
-  const sprites = new SpriteSheet(image, 15, 15);
-  sprites.define("ground1", 3, 215);
-  sprites.define("ground2", 3, 198);
-  sprites.define("sky", 105, 15);
-
-  loadLevel("1-1").then((level) => {
-    level.backgrounds.forEach((background) =>
-      drawBackground(background, context, sprites)
-    );
+function loadBackground() {
+  return loadImage("/image/tiles.png").then((image) => {
+    const sprites = new SpriteSheet(image, 15, 15);
+    sprites.define("ground1", 3, 215);
+    sprites.define("ground2", 3, 198);
+    sprites.define("sky", 105, 15);
+    return sprites;
   });
+}
+
+Promise.all([loadBackground(), loadLevel("1-1")]).then(([sprites, level]) => {
+  level.backgrounds.forEach((background) =>
+    drawBackground(background, context, sprites)
+  );
 });
