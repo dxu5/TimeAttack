@@ -1,22 +1,14 @@
 import Entity, { Trait } from "./entity.js";
 import { loadMario } from "./sprites.js";
-
-class Velocity extends Trait {
-  constructor() {
-    super("velocity");
-  }
-
-  update(entity, deltaTime) {
-    entity.pos.x += entity.vel.x * deltaTime;
-    entity.pos.y += entity.vel.y * deltaTime;
-  }
-}
+import Velocity from "./traits/velocity.js";
+import Jump from "./traits/jump.js";
 
 export function createMario() {
   return loadMario().then((sprite) => {
     const mario = new Entity();
 
     mario.addTrait(new Velocity());
+    mario.addTrait(new Jump());
 
     mario.draw = function drawMario(context) {
       sprite.draw("idle", context, this.pos.x, this.pos.y);
