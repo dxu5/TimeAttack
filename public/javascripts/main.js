@@ -8,12 +8,6 @@ import { createBackgroundLayer, createSpriteLayer } from "./layers.js";
 
 import Keyboard from "./keyboard.js";
 
-const input = new Keyboard();
-input.addMapping(32, (keyState) => {
-  console.log(keyState);
-});
-input.listenTo(window);
-
 const canvas = document.getElementById("screen");
 const context = canvas.getContext("2d");
 
@@ -29,6 +23,17 @@ Promise.all([createMario(), loadBackground(), loadLevel("1-1")]).then(
     const gravity = 2000;
     mario.pos.set(64, 180);
     mario.vel.set(200, -600);
+
+    const input = new Keyboard();
+    input.addMapping(32, (keyState) => {
+      if (keyState) {
+        mario.jump.start();
+      } else {
+        mario.jump.cancel();
+      }
+      console.log(keyState);
+    });
+    input.listenTo(window);
 
     const spriteLayer = createSpriteLayer(mario);
     comp.layers.push(spriteLayer);
