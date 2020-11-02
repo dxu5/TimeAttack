@@ -1,20 +1,15 @@
 import { loadLevel } from "./image_loader.js";
-import { loadBackground, loadMario } from "./sprites.js";
+import { loadBackground } from "./sprites.js";
 import Compositor from "./compositor.js";
+import { createMario } from "./entities.js";
 
-import { createBackgroundLayer } from "./layers.js";
+import { createBackgroundLayer, createSpriteLayer } from "./layers.js";
 
 const canvas = document.getElementById("screen");
 const context = canvas.getContext("2d");
 
-function createSpriteLayer(sprite, pos) {
-  return function drawSpriteLayer(context) {
-    sprite.draw("idle", context, pos.x, pos.y);
-  };
-}
-
-Promise.all([loadMario(), loadBackground(), loadLevel("1-1")]).then(
-  ([marioSprite, backgroundSprites, level]) => {
+Promise.all([createMario(), loadBackground(), loadLevel("1-1")]).then(
+  ([mario, backgroundSprites, level]) => {
     const comp = new Compositor();
     const backgroundLayer = createBackgroundLayer(
       level.backgrounds,
@@ -22,30 +17,29 @@ Promise.all([loadMario(), loadBackground(), loadLevel("1-1")]).then(
     );
     comp.layers.push(backgroundLayer);
 
-    const pos = {
-      x: 64,
-      y: 180,
-    };
+    const deltaTime = 1 / 60;
+    let accumulatedTime = 0;
+    let lastTime = 0;
+    const gravity = 30;
+    mario.pos.set(64, 180);
+    mario.vel.set(200, -600);
 
-    const gravity = 0.5;
-
-    const vel = {
-      x: 2,
-      y: -10,
-    };
-
-    const spriteLayer = createSpriteLayer(marioSprite, pos);
+    const spriteLayer = createSpriteLayer(mario);
     comp.layers.push(spriteLayer);
 
-    function update() {
-      comp.draw(context);
+    function update(time) {
+      accumulatedTime += (time - lastTime) / 1000;
+      while (accumulatedTime > deltaTime) {
+        comp.draw(context);
+        mario.update(deltaTime);
+        //add gravity
+        mario.vel.y += gravity;
+        accumulatedTime -= deltaTime;
+      }
 
-      pos.x += vel.x;
-      pos.y += vel.y;
-      //add gravity
-      vel.y += gravity;
       requestAnimationFrame(update); //takes a function and call its function next time browser is ready use when drawing
+      lastTime = time;
     }
-    update();
+    update(0);
   }
 );
