@@ -9,7 +9,7 @@ const context = canvas.getContext("2d");
 
 function createSpriteLayer(sprite, pos) {
   return function drawSpriteLayer(context) {
-    sprite.draw("idle", context, pos.x + i * 16, pos.y);
+    sprite.draw("idle", context, pos.x, pos.y);
   };
 }
 
@@ -23,8 +23,15 @@ Promise.all([loadMario(), loadBackground(), loadLevel("1-1")]).then(
     comp.layers.push(backgroundLayer);
 
     const pos = {
-      x: 0,
-      y: 0,
+      x: 64,
+      y: 180,
+    };
+
+    const gravity = 0.5;
+
+    const vel = {
+      x: 2,
+      y: -10,
     };
 
     const spriteLayer = createSpriteLayer(marioSprite, pos);
@@ -33,8 +40,10 @@ Promise.all([loadMario(), loadBackground(), loadLevel("1-1")]).then(
     function update() {
       comp.draw(context);
 
-      pos.x += 2;
-      pos.y += 2;
+      pos.x += vel.x;
+      pos.y += vel.y;
+      //add gravity
+      vel.y += gravity;
       requestAnimationFrame(update); //takes a function and call its function next time browser is ready use when drawing
     }
     update();
