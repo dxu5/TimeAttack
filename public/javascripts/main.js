@@ -1,5 +1,5 @@
-import SpriteSheet from "./sprite_sheet.js";
-import { loadImage, loadLevel } from "./image_loader.js";
+import { loadLevel } from "./image_loader.js";
+import { loadBackground, loadMario } from "./sprites.js";
 
 const drawBackground = (background, context, sprites) => {
   background.ranges.forEach(([x1, x2, y1, y2]) => {
@@ -14,18 +14,17 @@ const drawBackground = (background, context, sprites) => {
 const canvas = document.getElementById("screen");
 const context = canvas.getContext("2d");
 
-function loadBackground() {
-  return loadImage("/image/tiles.png").then((image) => {
-    const sprites = new SpriteSheet(image, 15, 15);
-    sprites.define("ground1", 3, 215);
-    sprites.define("ground2", 3, 198);
-    sprites.define("sky", 105, 15);
-    return sprites;
-  });
-}
+Promise.all([loadMario(), loadBackground(), loadLevel("1-1")]).then(
+  ([marioSprite, sprites, level]) => {
+    level.backgrounds.forEach((background) =>
+      drawBackground(background, context, sprites)
+    );
 
-Promise.all([loadBackground(), loadLevel("1-1")]).then(([sprites, level]) => {
-  level.backgrounds.forEach((background) =>
-    drawBackground(background, context, sprites)
-  );
-});
+    const pos = {
+      x: 64,
+      y: 64,
+    };
+
+    marioSprite.draw("idle", context, pos.x, pos.y);
+  }
+);
